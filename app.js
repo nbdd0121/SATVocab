@@ -26,11 +26,15 @@ function lookupInv(exp) {
 }
 
 function toggleDisplay(word) {
+  if (word.timeout != null) {
+    clearTimeout(word.timeout);
+  }
   if (word.translated) {
     word.textContent = lookupInv(word.textContent);
     word.translated = false;
   } else {
-    setTimeout(function() {
+    word.timeout = setTimeout(function() {
+      word.timeout = null;
       if (word.translated) {
         toggleDisplay(word);
       }
