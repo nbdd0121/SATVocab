@@ -25,6 +25,14 @@ function toggleDisplay(word){
     word.translated=true;
   }
 }
+
+$(document).on("pagebeforecreate", "#allvocab", function(event){
+  var allvocablist=$("#allvocablist");
+  vocab.forEach(function(a){
+    allvocablist.append('<li data-icon="false"><a onclick="toggleDisplay(this);">'+a.w+"</a></li>");
+  });
+});
+
 </script>
 </head>
 <body>
@@ -51,12 +59,7 @@ function toggleDisplay(word){
   </div>
 
   <div data-role="content">
-    <ul data-role="listview" data-autodividers="true" data-filter="true" data-filter-placeholder="Search Word">
-<script>
-vocab.forEach(function(a){
-  document.write('<li data-icon="false"><a onclick="toggleDisplay(this);">'+a.w+"</a></li>");
-});
-</script>
+    <ul id="allvocablist" data-role="listview" data-autodividers="true" data-filter="true" data-filter-placeholder="Search Word">
     </ul>
   </div>
 </div>
