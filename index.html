@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css">
+<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
+<script src="wordlist.js"></script>
+<script>
+function toggleDisplay(word){
+  if(word.translated){
+    var e=word.textContent;
+    var w=vocab.filter(function(a) {
+      return a.e==e;
+    })[0].w;
+    word.textContent=w;
+    word.translated=false;
+  }else{
+    var w=word.textContent;
+    var e=vocab.filter(function(a) {
+      return a.w==w;
+    })[0].e;
+    word.textContent=e;
+    word.translated=true;
+  }
+}
+</script>
+</head>
+<body>
+
+<div data-role="page" id="main">
+  <div data-role="header">
+    <h1>SAT Vocab</h1>
+  </div>
+
+  <div data-role="content">
+    <a href="#flashcard" data-role="button">Start</a>
+    <a href="#allvocab" data-role="button">Search</a>
+  </div>
+
+  <div data-role="footer" data-position="fixed">
+    <h1>Copyright (c) 2014 Gary Guo</h1>
+  </div>
+</div> 
+
+<div data-role="page" id="allvocab">
+  <div data-role="header">
+    <a href="#main" data-role="button" data-icon="arrow-l">&nbsp;</a>
+    <h1>All Vocabularies</h1>
+  </div>
+
+  <div data-role="content">
+    <ul data-role="listview" data-autodividers="true" data-filter="true" data-filter-placeholder="Search Word">
+<script>
+vocab.forEach(function(a){
+  document.write('<li data-icon="false"><a onclick="toggleDisplay(this);">'+a.w+"</a></li>");
+});
+</script>
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="flashcard">
+  <div data-role="header">
+    <a href="#main" data-role="button" data-icon="arrow-l">&nbsp;</a>
+    <h1>I wanna recite SAT vocab!</h1>
+  </div>
+
+  <div data-role="content">
+    <p>TBD</p>
+  </div>
+
+  <div data-role="footer">
+    <h1>Copyright (c) 2014 Gary Guo</h1>
+  </div>
+</div> 
+
+</body>
+</html>
