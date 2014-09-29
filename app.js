@@ -74,6 +74,7 @@ function showVocabTest() {
     var ans = event.target.textContent;
     if (answer == ans) {
       $(".option").unbind('click', handler);
+      event.target.blur();
       showVocabTest();
     } else {
       $(event.target).addClass('ui-disabled');
