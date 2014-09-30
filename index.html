@@ -17,7 +17,7 @@
   </div>
 
   <div data-role="content">
-    <a href="#flashcard" data-role="button" data-rel="dialog" class="ui-disabled">Start</a>
+    <!--<a href="#flashcard" data-role="button" data-rel="dialog" class="ui-disabled">Start</a>-->
     <a href="#test" data-role="button" data-rel="dialog">Test</a>
     <a href="#allvocab" data-role="button" data-transition="slide">Search</a>
     <a href="#setting" data-role="button" data-transition="slide">Setting</a>
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<div data-role="page" id="flashcard">
+<!--<div data-role="page" id="flashcard">
   <div data-role="header">
     <a href="#main" data-role="button" data-icon="back" data-transition="slide" data-direction="reverse">&nbsp;</a>
     <h1>I wanna recite SAT vocab!</h1>
@@ -53,12 +53,12 @@
   <div data-role="footer">
     <h1>Copyright (c) 2014 Gary Guo</h1>
   </div>
-</div> 
+</div> -->
 
 <div data-role="page" id="test">
   <div data-role="header">
     <h1 id="test-vocab"></h1>
-    <a data-role="button" class="ui-btn-right" id="pron" onclick="pronounce($('#test-vocab').text());"><img src="pron.png"></img></a>
+    <a data-role="button" class="ui-btn-right" id="pron" onclick="pronounce(currentTest.voice);"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">
@@ -77,11 +77,20 @@
   </div>
 
   <div data-role="content">
-    <div data-role="fieldcontain">
-      <label>Auto Pronounce: </label>
+    <fieldset data-role="fieldcontain">
+      <label>Auto Pronounce</label>
       <input type="checkbox" data-role="flipswitch" id="autosound" onchange="Setting.autosound=$(this).prop('checked');" />
-    </div>
+    </fieldset>
+    <fieldset data-role="fieldcontain">
+    <label>Test Type</label>
+    <select id="testtype" onchange="Setting.testtype=$(this).val();" multiple="multiple" data-native-menu="false">
+      <option value="e2c">English to Chinese</option>
+      <option value="c2e">Chinese to English</option>
+      <option value="listen">Listening Test</option>
+    </select>
+  </fieldset>
   </div>
+
 </div> 
 
 </body>

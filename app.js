@@ -9,25 +9,44 @@ var AudioPlayer = {
 var Setting = (function() {
   var setting = {
     get autosound() {
-      return this._autosound;
+      return this.config.autosound;
     },
     set autosound(val) {
-      this._autosound = val;
+      this.config.autosound = val;
+      this.update();
+    },
+    get testtypeFunc() {
+      switch (this.config.testtype.random()) {
+        case "e2c":
+          return genE2CQ;
+        case "c2e":
+          return genC2EQ;
+        case "listen":
+          return genListening;
+      }
+    },
+    get testtype() {
+      return this.config.testtype;
+    },
+    set testtype(type) {
+      this.config.testtype = type;
       this.update();
     },
     update: function() {
-      localStorage['SATVocabSetting'] = JSON.stringify({
-        autosound: this._autosound
-      })
+      localStorage['SATVocabSetting'] = JSON.stringify(this.config);
     }
   }
   var stored = localStorage['SATVocabSetting'];
   if (stored) {
     stored = JSON.parse(stored);
-    setting._autosound = stored.autosound;
   } else {
-    setting._autosound = true;
+    stored = {};
   }
+  stored = $.extend({
+    autosound: true,
+    testtype: ["e2c", "c2e", "listen"],
+  }, stored);
+  setting.config = stored;
   return setting;
 })();
 
@@ -88,7 +107,15 @@ $(document).on("pagebeforecreate", "#allvocab", function(event) {
   })
 });
 
+var currentTest;
+
 function testVocab(test, callback) {
+  if (test.voice) {
+    $("#pron").show();
+  } else {
+    $("#pron").hide();
+  }
+  currentTest = test;
   $("#test-vocab").text(test.question);
   test.choices.shuffle();
   for (var i = 0; i < 5; i++) {
@@ -109,7 +136,6 @@ function testVocab(test, callback) {
 }
 
 function genE2CQ() {
-  $("#pron").show();
   var vocab = vocabularies.random();
   var answer = lookup(vocab);
   var exp = [answer];
@@ -123,14 +149,33 @@ function genE2CQ() {
     pronounce(vocab);
   }
   return {
+    voice: vocab,
     question: vocab,
     answer: answer,
     choices: exp
   };
 }
 
+function genListening() {
+  var vocab = vocabularies.random();
+  var answer = lookup(vocab);
+  var exp = [answer];
+  while (exp.length != 5) {
+    var e = explanations.random();
+    if (exp.indexOf(e) == -1) {
+      exp.push(e);
+    }
+  }
+  pronounce(vocab);
+  return {
+    voice: vocab,
+    question: "Listening Test",
+    answer: answer,
+    choices: exp
+  };
+}
+
 function genC2EQ() {
-  $("#pron").hide();
   var answer = vocabularies.random();
   var vocab = lookup(answer);
   var exp = [answer];
@@ -141,6 +186,7 @@ function genC2EQ() {
     }
   }
   return {
+    voice: null,
     question: vocab,
     answer: answer,
     choices: exp
@@ -148,7 +194,7 @@ function genC2EQ() {
 }
 
 function showVocabTest() {
-  testVocab(genE2CQ(), function() {
+  testVocab(Setting.testtypeFunc(), function() {
     showVocabTest();
   });
 }
@@ -160,4 +206,6 @@ $(document).on("pagebeforeshow", "#test", function(event) {
 $(document).on("pagebeforeshow", "#setting", function(event) {
   $("#autosound").prop('checked', Setting.autosound);
   $("#autosound").flipswitch('refresh');
+  $("#testtype").val(Setting.testtype);
+  $("#testtype").selectmenu('refresh');
 });
