@@ -51,6 +51,7 @@ function toggleDisplay(word) {
         toggleDisplay(word);
       }
     }, 5000);
+    pronounce(word.textContent);
     word.textContent = lookup(word.textContent);
     word.translated = true;
   }
