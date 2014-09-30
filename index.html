@@ -67,19 +67,19 @@
 <div data-role="page" id="test">
   <div data-role="header">
     <h1 id="test-vocab"></h1>
-    <a data-role="button" class="ui-btn-right" id="pron" onclick="pronounce(currentTest.voice);"><img src="pron.png"></img></a>
+    <a data-role="button" class="ui-btn-right" id="pron" onclick="TestService.voice();"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">
-    <a class="option" data-role="button"></a>
-    <a class="option" data-role="button"></a>
-    <a class="option" data-role="button"></a>
-    <a class="option" data-role="button"></a>
-    <a class="option" data-role="button"></a>
+    <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
+    <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
+    <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
+    <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
+    <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
     <br/>
     <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
-      <a data-role="button">Hint</a>
-      <a data-role="button">Whitelist</a>
+      <a data-role="button" onclick="TestService.hint();">Hint</a>
+      <!--<a data-role="button" onclick="alert('Oops! This feature isn\'t available now!')">Whitelist</a>-->
     </div>
     
   </div>

@@ -1,8 +1,11 @@
-var AudioPlayer = {
+var AudioService = {
   audio: $('<audio>')[0],
   play: function(src) {
     this.audio.src = src;
     this.audio.play();
+  },
+  pronounce: function(word) {
+    AudioService.play('http://dict.youdao.com/dictvoice?audio=' + word);
   }
 };
 
@@ -14,16 +17,6 @@ var Setting = (function() {
     set autosound(val) {
       this.config.autosound = val;
       this.update();
-    },
-    get testtypeFunc() {
-      switch (this.config.testtype.random()) {
-        case "e2c":
-          return genE2CQ;
-        case "c2e":
-          return genC2EQ;
-        case "listen":
-          return genListening;
-      }
     },
     get testtype() {
       return this.config.testtype;
@@ -50,11 +43,152 @@ var Setting = (function() {
   return setting;
 })();
 
+var TestService = (function() {
+  function getWord() {
+    return vocabularies.random();
+  }
+  var service = {
+    current: null,
+    data: null,
+    helper: {
+      mcqClick: function(btn) {
+        var ans = btn.textContent;
+        if (!service.answer(ans)) {
+          $(btn).addClass("ui-disabled");
+        } else {
+          $(".option").removeClass("ui-disabled");
+          service.next();
+        }
+      },
+      mcqSetup: function(data) {
+        service.data = data;
+        $("#test-vocab").text(data.title);
+        if (data.hasVoice)
+          $("#pron").show();
+        else
+          $("#pron").hide();
+        for (var i = 0; i < 5; i++) {
+          $(".option:nth-child(" + (i + 1) + ")").text(data.choices[i]);
+        }
+      },
+      mcqHint: function() {
+        var leftAnswers = $(".option").not(".ui-disabled");
+        for (var i = 0; i < leftAnswers.length; i++) {
+          if (leftAnswers[i].textContent == service.data.answer) {
+            leftAnswers.splice(i, 1);
+          }
+        }
+        if (leftAnswers.length != 0) {
+          $(Array.prototype.random.call(leftAnswers)).addClass(
+            "ui-disabled");
+        }
+      },
+      mcqVoice: function() {
+        AudioService.pronounce(service.data.word);
+      },
+      mcqAnswer: function(ans) {
+        return ans == service.data.answer;
+      },
+      mcqWrapper: function(generator) {
+        var wrapped = {
+          next: function(word) {
+            var data = generator(word);
+            service.helper.mcqSetup(data);
+          },
+          answer: service.helper.mcqAnswer,
+          voice: service.helper.mcqVoice,
+          hint: service.helper.mcqHint
+        };
+        return wrapped;
+      }
+    },
+    next: function() {
+      service.current = service.pool[Setting.testtype.random()];
+      service.current.next(getWord());
+    },
+    hint: function() {
+      return service.current.hint();
+    },
+    answer: function(ans) {
+      return service.current.answer(ans);
+    },
+    voice: function() {
+      return service.current.voice();
+    },
+    pool: {}
+  };
 
+  return service;
+})();
 
-function pronounce(word) {
-  AudioPlayer.play('http://dict.youdao.com/dictvoice?audio=' + word);
-}
+TestService.pool.e2c = TestService.helper.mcqWrapper(function(word) {
+  var answer = lookup(word);
+  var exp = [answer];
+  while (exp.length != 5) {
+    var e = explanations.random();
+    if (exp.indexOf(e) == -1) {
+      exp.push(e);
+    }
+  }
+  var data = {
+    word: word,
+    title: word,
+    choices: exp.shuffle(),
+    hasVoice: true,
+    answer: answer,
+  };
+  if (Setting.autosound) {
+    AudioService.pronounce(word);
+  }
+  return data;
+});
+
+TestService.pool.c2e = TestService.helper.mcqWrapper(function(word) {
+  var title = lookup(word);
+  var exp = [word];
+  while (exp.length != 5) {
+    var e = vocabularies.random();
+    if (exp.indexOf(e) == -1) {
+      exp.push(e);
+    }
+  }
+  var data = {
+    word: word,
+    title: title,
+    choices: exp.shuffle(),
+    hasVoice: false,
+    answer: word,
+  };
+  return data;
+});
+
+TestService.pool.listen = $.extend(TestService.helper.mcqWrapper(function(word) {
+  var answer = lookup(word);
+  var exp = [answer];
+  while (exp.length != 5) {
+    var e = explanations.random();
+    if (exp.indexOf(e) == -1) {
+      exp.push(e);
+    }
+  }
+  var data = {
+    word: word,
+    title: "Listening Test",
+    choices: exp.shuffle(),
+    hasVoice: true,
+    answer: answer,
+  };
+  AudioService.pronounce(word);
+  return data;
+}), {
+  hint: function() {
+    if (TestService.data.title == "Listening Test") {
+      $("#test-vocab").text(TestService.data.title = TestService.data.word);
+    } else {
+      TestService.helper.mcqHint();
+    }
+  }
+});
 
 Array.prototype.random = function() {
   var id = Math.floor(Math.random() * this.length);
@@ -64,6 +198,7 @@ Array.prototype.random = function() {
 Array.prototype.shuffle = function() {
   for (var j, x, i = this.length; i; j = Math.floor(Math.random() * i), x =
     this[--i], this[i] = this[j], this[j] = x);
+  return this;
 }
 
 function lookup(word) {
@@ -92,7 +227,7 @@ function toggleDisplay(word) {
         toggleDisplay(word);
       }
     }, 5000);
-    pronounce(word.textContent);
+    AudioService.pronounce(word.textContent);
     word.textContent = lookup(word.textContent);
     word.translated = true;
   }
@@ -107,100 +242,8 @@ $(document).on("pagebeforecreate", "#allvocab", function(event) {
   })
 });
 
-var currentTest;
-
-function testVocab(test, callback) {
-  if (test.voice) {
-    $("#pron").show();
-  } else {
-    $("#pron").hide();
-  }
-  currentTest = test;
-  $("#test-vocab").text(test.question);
-  test.choices.shuffle();
-  for (var i = 0; i < 5; i++) {
-    var sel = $(".option:nth-child(" + (i + 1) + ")");
-    sel.text(test.choices[i]);
-    sel.removeClass('ui-disabled');
-  }
-  var handler = function(event) {
-    var ans = event.target.textContent;
-    if (test.answer == ans) {
-      $(".option").unbind('click', handler);
-      callback();
-    } else {
-      $(event.target).addClass('ui-disabled');
-    }
-  };
-  $(".option").click(handler);
-}
-
-function genE2CQ() {
-  var vocab = vocabularies.random();
-  var answer = lookup(vocab);
-  var exp = [answer];
-  while (exp.length != 5) {
-    var e = explanations.random();
-    if (exp.indexOf(e) == -1) {
-      exp.push(e);
-    }
-  }
-  if (Setting.autosound) {
-    pronounce(vocab);
-  }
-  return {
-    voice: vocab,
-    question: vocab,
-    answer: answer,
-    choices: exp
-  };
-}
-
-function genListening() {
-  var vocab = vocabularies.random();
-  var answer = lookup(vocab);
-  var exp = [answer];
-  while (exp.length != 5) {
-    var e = explanations.random();
-    if (exp.indexOf(e) == -1) {
-      exp.push(e);
-    }
-  }
-  pronounce(vocab);
-  return {
-    voice: vocab,
-    question: "Listening Test",
-    answer: answer,
-    choices: exp
-  };
-}
-
-function genC2EQ() {
-  var answer = vocabularies.random();
-  var vocab = lookup(answer);
-  var exp = [answer];
-  while (exp.length != 5) {
-    var e = vocabularies.random();
-    if (exp.indexOf(e) == -1) {
-      exp.push(e);
-    }
-  }
-  return {
-    voice: null,
-    question: vocab,
-    answer: answer,
-    choices: exp
-  };
-}
-
-function showVocabTest() {
-  testVocab(Setting.testtypeFunc(), function() {
-    showVocabTest();
-  });
-}
-
 $(document).on("pagebeforeshow", "#test", function(event) {
-  showVocabTest();
+  TestService.next();
 });
 
 $(document).on("pagebeforeshow", "#setting", function(event) {
