@@ -6,6 +6,33 @@ var AudioPlayer = {
   }
 };
 
+var Setting = (function() {
+  var setting = {
+    get autosound() {
+      return this._autosound;
+    },
+    set autosound(val) {
+      this._autosound = val;
+      this.update();
+    },
+    update: function() {
+      localStorage['SATVocabSetting'] = JSON.stringify({
+        autosound: this._autosound
+      })
+    }
+  }
+  var stored = localStorage['SATVocabSetting'];
+  if (stored) {
+    stored = JSON.parse(stored);
+    setting._autosound = stored.autosound;
+  } else {
+    setting._autosound = true;
+  }
+  return setting;
+})();
+
+
+
 function pronounce(word) {
   AudioPlayer.play('http://dict.youdao.com/dictvoice?audio=' + word);
 }
@@ -61,7 +88,28 @@ $(document).on("pagebeforecreate", "#allvocab", function(event) {
   })
 });
 
-function showVocabTest() {
+function testVocab(test, callback) {
+  $("#test-vocab").text(test.question);
+  test.choices.shuffle();
+  for (var i = 0; i < 5; i++) {
+    var sel = $(".option:nth-child(" + (i + 1) + ")");
+    sel.text(test.choices[i]);
+    sel.removeClass('ui-disabled');
+  }
+  var handler = function(event) {
+    var ans = event.target.textContent;
+    if (test.answer == ans) {
+      $(".option").unbind('click', handler);
+      callback();
+    } else {
+      $(event.target).addClass('ui-disabled');
+    }
+  };
+  $(".option").click(handler);
+}
+
+function genE2CQ() {
+  $("#pron").show();
   var vocab = vocabularies.random();
   var answer = lookup(vocab);
   var exp = [answer];
@@ -71,26 +119,45 @@ function showVocabTest() {
       exp.push(e);
     }
   }
-  exp.shuffle();
-  $("#test-vocab").text(vocab);
-  for (var i = 0; i < 5; i++) {
-    var sel = $(".option:nth-child(" + (i + 1) + ")");
-    sel.text(exp[i]);
-    sel.removeClass('ui-disabled');
+  if (Setting.autosound) {
+    pronounce(vocab);
   }
-  var handler = function(event) {
-    var ans = event.target.textContent;
-    if (answer == ans) {
-      $(".option").unbind('click', handler);
-      showVocabTest();
-    } else {
-      $(event.target).addClass('ui-disabled');
-    }
+  return {
+    question: vocab,
+    answer: answer,
+    choices: exp
   };
-  $(".option").click(handler);
-  pronounce(vocab);
+}
+
+function genC2EQ() {
+  $("#pron").hide();
+  var answer = vocabularies.random();
+  var vocab = lookup(answer);
+  var exp = [answer];
+  while (exp.length != 5) {
+    var e = vocabularies.random();
+    if (exp.indexOf(e) == -1) {
+      exp.push(e);
+    }
+  }
+  return {
+    question: vocab,
+    answer: answer,
+    choices: exp
+  };
+}
+
+function showVocabTest() {
+  testVocab(genE2CQ(), function() {
+    showVocabTest();
+  });
 }
 
 $(document).on("pagebeforeshow", "#test", function(event) {
   showVocabTest();
+});
+
+$(document).on("pagebeforeshow", "#setting", function(event) {
+  $("#autosound").prop('checked', Setting.autosound);
+  $("#autosound").flipswitch('refresh');
 });

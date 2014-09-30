@@ -19,7 +19,8 @@
   <div data-role="content">
     <a href="#flashcard" data-role="button" data-rel="dialog" class="ui-disabled">Start</a>
     <a href="#test" data-role="button" data-rel="dialog">Test</a>
-    <a href="#allvocab" data-role="button">Search</a>
+    <a href="#allvocab" data-role="button" data-transition="slide">Search</a>
+    <a href="#setting" data-role="button" data-transition="slide">Setting</a>
   </div>
 
   <div data-role="footer" data-position="fixed">
@@ -41,7 +42,7 @@
 
 <div data-role="page" id="flashcard">
   <div data-role="header">
-    <a href="#main" data-role="button" data-icon="back">&nbsp;</a>
+    <a href="#main" data-role="button" data-icon="back" data-transition="slide" data-direction="reverse">&nbsp;</a>
     <h1>I wanna recite SAT vocab!</h1>
   </div>
 
@@ -57,7 +58,7 @@
 <div data-role="page" id="test">
   <div data-role="header">
     <h1 id="test-vocab"></h1>
-    <a data-role="button" class="ui-btn-right" onclick="pronounce($('#test-vocab').text());"><img src="pron.png"></img></a>
+    <a data-role="button" class="ui-btn-right" id="pron" onclick="pronounce($('#test-vocab').text());"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">
@@ -66,6 +67,20 @@
     <a class="option" data-role="button"></a>
     <a class="option" data-role="button"></a>
     <a class="option" data-role="button"></a>
+  </div>
+</div> 
+
+<div data-role="page" id="setting">
+  <div data-role="header">
+    <a href="#main" data-role="button" data-icon="back" data-transition="slide" data-direction="reverse">&nbsp;</a>
+    <h1>Setting</h1>
+  </div>
+
+  <div data-role="content">
+    <div data-role="fieldcontain">
+      <label>Auto Pronounce: </label>
+      <input type="checkbox" data-role="flipswitch" id="autosound" onchange="Setting.autosound=$(this).prop('checked');" />
+    </div>
   </div>
 </div> 
 
