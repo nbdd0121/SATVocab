@@ -29,7 +29,7 @@
 
 <div data-role="page" id="allvocab">
   <div data-role="header">
-    <a href="#main" data-role="button" data-icon="arrow-l">&nbsp;</a>
+    <a href="#main" data-role="button" data-icon="back">&nbsp;</a>
     <h1>All Vocabularies</h1>
   </div>
 
@@ -41,7 +41,7 @@
 
 <div data-role="page" id="flashcard">
   <div data-role="header">
-    <a href="#main" data-role="button" data-icon="arrow-l">&nbsp;</a>
+    <a href="#main" data-role="button" data-icon="back">&nbsp;</a>
     <h1>I wanna recite SAT vocab!</h1>
   </div>
 
@@ -56,7 +56,8 @@
 
 <div data-role="page" id="test">
   <div data-role="header">
-    <h1 id="test-vocab">I wanna recitea SAT vocab!</h1>
+    <h1 id="test-vocab"></h1>
+    <a data-role="button" class="ui-btn-right" onclick="pronounce($('#test-vocab').text());"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">

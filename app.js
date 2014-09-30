@@ -1,3 +1,15 @@
+var AudioPlayer = {
+  audio: $('<audio>')[0],
+  play: function(src) {
+    this.audio.src = src;
+    this.audio.play();
+  }
+};
+
+function pronounce(word) {
+  AudioPlayer.play('http://dict.youdao.com/dictvoice?audio=' + word);
+}
+
 var allvocab = [];
 for (var a in vocab) {
   allvocab.push(a.substr(1));
@@ -80,6 +92,7 @@ function showVocabTest() {
     }
   };
   $(".option").click(handler);
+  pronounce(vocab);
 }
 
 $(document).on("pagebeforeshow", "#test", function(event) {
