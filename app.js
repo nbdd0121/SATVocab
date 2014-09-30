@@ -10,11 +10,6 @@ function pronounce(word) {
   AudioPlayer.play('http://dict.youdao.com/dictvoice?audio=' + word);
 }
 
-var allvocab = [];
-for (var a in vocab) {
-  allvocab.push(a.substr(1));
-}
-
 Array.prototype.random = function() {
   var id = Math.floor(Math.random() * this.length);
   return this[id];
@@ -26,13 +21,13 @@ Array.prototype.shuffle = function() {
 }
 
 function lookup(word) {
-  return vocab["-" + word];
+  return explanations[vocabId["-" + word]];
 }
 
 function lookupInv(exp) {
-  for (var a in vocab) {
-    if (vocab[a] == exp) {
-      return a.substr(1);
+  for (var i = 0; i < explanations.length; i++) {
+    if (explanations[i] == exp) {
+      return vocabularies[i];
     }
   }
 }
@@ -59,7 +54,7 @@ function toggleDisplay(word) {
 
 $(document).on("pagebeforecreate", "#allvocab", function(event) {
   var allvocablist = $("#allvocablist");
-  allvocab.forEach(function(a) {
+  vocabularies.forEach(function(a) {
     allvocablist.append(
       '<li data-icon="false"><a onclick="toggleDisplay(this);">' + a +
       "</a></li>");
@@ -67,11 +62,11 @@ $(document).on("pagebeforecreate", "#allvocab", function(event) {
 });
 
 function showVocabTest() {
-  var vocab = allvocab.random();
+  var vocab = vocabularies.random();
   var answer = lookup(vocab);
   var exp = [answer];
   while (exp.length != 5) {
-    var e = lookup(allvocab.random());
+    var e = explanations.random();
     if (exp.indexOf(e) == -1) {
       exp.push(e);
     }
