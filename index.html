@@ -34,7 +34,7 @@
   </div>
 
   <div data-role="footer" data-position="fixed">
-    <h1>Version 0.7</h1>
+    <h1>Version 0.7.1</h1>
     <h1>Copyright (c) 2014 Gary Guo</h1>
   </div>
 </div> 
@@ -66,6 +66,7 @@
 <div data-role="page" id="flashcard">
   <div data-role="header">
     <h1 id="flashcard-title"></h1>
+    <a data-role="button" class="ui-btn-right" id="pron" onclick="AudioService.pronounce($('#flashcard-title').text());"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">

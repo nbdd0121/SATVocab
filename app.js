@@ -267,10 +267,13 @@ var Flashcard = {
   view: function(word, callback) {
     $("#flashcard-title").text(word);
     $("#flashcard-cont").text(lookup(word));
+    $("#flashcard-btn").text("Done").one('click', callback);
     $.mobile.changePage('#flashcard', {
       role: 'dialog'
     });
-    $("#flashcard-btn").text("Done").one('click', callback);
+    if (Setting.autosound) {
+      AudioService.pronounce(word);
+    }
   },
   study: function(word) {
     var i = WordQueue.shift();
