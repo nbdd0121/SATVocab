@@ -36,6 +36,13 @@ var Setting = (function() {
       this.config.testtype = type;
       this.update();
     },
+    get autoreview() {
+      return this.config.autoreview;
+    },
+    set autoreview(val) {
+      this.config.autoreview = val;
+      this.update();
+    },
     update: function() {
       localStorage['SATVocabSetting'] = JSON.stringify(this.config);
     }
@@ -48,6 +55,7 @@ var Setting = (function() {
   }
   stored = $.extend({
     autosound: true,
+    autoreview: true,
     testtype: ["e2c", "c2e", "listen"],
   }, stored);
   setting.config = stored;
@@ -117,7 +125,7 @@ var TestService = (function() {
         if (!service.answer(ans)) {
           $(btn).addClass("ui-disabled");
         } else {
-          service.next();
+          service.end();
         }
       },
       mcqSetup: function(data) {
@@ -150,7 +158,20 @@ var TestService = (function() {
         return ans == service.data.answer;
       },
       mcqEnd: function() {
-        $(".option").removeClass("ui-disabled");
+        var disabled = $(".option.ui-disabled");
+        if (disabled.length != 0) {
+          $(".option").removeClass("ui-disabled");
+          if (Setting.autoreview) {
+            Flashcard.view(service.data.word, function() {
+              Flashcard.hide();
+              service.next();
+            });
+          } else {
+            service.next();
+          }
+        } else {
+          service.next();
+        }
       },
       mcqWrapper: function(generator) {
         var wrapped = {
@@ -172,10 +193,10 @@ var TestService = (function() {
       WordData.update();
       this.next();
     },
+    end: function() {
+      service.current.end();
+    },
     next: function() {
-      if (service.current) {
-        service.current.end();
-      }
       service.current = service.pool[Setting.testtype.random()];
       service.current.next(getWord());
     },
@@ -280,6 +301,9 @@ var Flashcard = {
     WordQueue.push(i);
     this.view(vocabularies[i], Flashcard.study.bind(Flashcard));
     $("#flashcard-btn").text("Next");
+  },
+  hide: function() {
+    $('#flashcard').dialog('close');
   }
 };
 
@@ -319,6 +343,7 @@ var PopupService = (function() {
       $.mobile.changePage('#prompt', {
         role: 'dialog'
       });
+      $("#prompt-input").focus();
     },
     alert: function(title, cont, callback) {
       this.popup(title, cont, ["Done"], [true], callback);
@@ -378,6 +403,8 @@ $(document).on("pagebeforeshow", "#test", function(event) {
 $(document).on("pagebeforeshow", "#setting", function(event) {
   $("#autosound").prop('checked', Setting.autosound);
   $("#autosound").flipswitch('refresh');
+  $("#autoreview").prop('checked', Setting.autoreview);
+  $("#autoreview").flipswitch('refresh')
   $("#testtype").val(Setting.testtype);
   $("#testtype").selectmenu('refresh');
 });

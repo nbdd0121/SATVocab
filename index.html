@@ -34,7 +34,7 @@
   </div>
 
   <div data-role="footer" data-position="fixed">
-    <h1>Version 0.7.1</h1>
+    <h1>Version 0.7.2</h1>
     <h1>Copyright (c) 2014 Gary Guo</h1>
   </div>
 </div> 
@@ -107,6 +107,10 @@
     <fieldset data-role="fieldcontain">
       <label>Auto Pronounce</label>
       <input type="checkbox" data-role="flipswitch" id="autosound" onchange="Setting.autosound=$(this).prop('checked');" />
+    </fieldset>
+    <fieldset data-role="fieldcontain">
+      <label>Smart Flashcard Review</label>
+      <input type="checkbox" data-role="flipswitch" id="autoreview" onchange="Setting.autoreview=$(this).prop('checked');" />
     </fieldset>
     <fieldset data-role="fieldcontain">
       <label>Test Type</label>
