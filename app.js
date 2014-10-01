@@ -57,10 +57,19 @@ var Setting = (function() {
 var WordData = (function() {
   var data = {
     get: function(word) {
+      if (!this.data[word]) {
+        this.data[word] = {
+          w: false
+        };
+      }
       return this.data[word];
     },
     update: function() {
       localStorage['SATVocabData'] = JSON.stringify(this.data);
+    },
+    clear: function() {
+      this.data = [];
+      this.update();
     }
   }
   var stored = localStorage['SATVocabData'];
@@ -69,19 +78,7 @@ var WordData = (function() {
   } else {
     stored = [];
   }
-  var modified = false;
-  for (var i = 0; i < vocabularies.length; i++) {
-    if (!stored[i]) {
-      stored[i] = {
-        w: false
-      };
-      modified = true;
-    }
-  }
   data.data = stored;
-  if (modified) {
-    data.update();
-  }
   return data;
 })();
 
@@ -266,6 +263,70 @@ TestService.pool.listen = $.extend(TestService.helper.mcqWrapper(function(word) 
   }
 });
 
+var Flashcard = {
+  view: function(word, callback) {
+    $("#flashcard-title").text(word);
+    $("#flashcard-cont").text(lookup(word));
+    $.mobile.changePage('#flashcard', {
+      role: 'dialog'
+    });
+    $("#flashcard-btn").text("Done").one('click', callback);
+  },
+  study: function(word) {
+    var i = WordQueue.shift();
+    WordQueue.push(i);
+    this.view(vocabularies[i], Flashcard.study.bind(Flashcard));
+    $("#flashcard-btn").text("Next");
+  }
+};
+
+var PopupService = (function() {
+  var service = {
+    popup: function(title, cont, options, val, callback) {
+      $("#popup-title").html(title);
+      $("#popup-cont").html(cont);
+      var result;
+      $("#popup").one('pagehide', function() {
+        $("#popup-btns").controlgroup('destroy');
+        if (callback) callback(result);
+      });
+      $("#popup-btns").html("");
+      options.forEach(function(a, b) {
+        var btn = $('<a data-role="button">' + a + '</a>');
+        btn.one('click', function() {
+          result = val[b];
+          $("#popup").dialog('close');
+        });
+        $("#popup-btns").append(btn);
+        btn.buttonMarkup();
+      });
+      $("#popup-btns").controlgroup();
+      $.mobile.changePage('#popup', {
+        role: 'dialog'
+      });
+    },
+    prompt: function(title, cont, def, callback) {
+      $("#prompt-title").html(title);
+      $("#prompt-cont").html(cont);
+      $("#prompt-input").val(def);
+      this.result = undefined;
+      $("#prompt").one('pagehide', function() {
+        if (callback) callback(service.result);
+      });
+      $.mobile.changePage('#prompt', {
+        role: 'dialog'
+      });
+    },
+    alert: function(title, cont, callback) {
+      this.popup(title, cont, ["Done"], [true], callback);
+    },
+    confirm: function(title, cont, callback) {
+      this.popup(title, cont, ["Yes", "No"], [true, false], callback);
+    }
+  };
+  return service;
+})();
+
 function lookup(word) {
   return explanations[vocabId["-" + word]];
 }
@@ -333,4 +394,22 @@ $(document).on("pagebeforeshow", "#whitelistPage", function(event) {
 $(document).on("pagehide", "#whitelistPage", function(event) {
   var whitelist = $("#whitelist");
   whitelist.html("");
+});
+
+$(document).on('click', '#setting-delete', function(event) {
+  PopupService.confirm('Confirmation',
+    'Do you really want to erase all data from the device? This process is not reversible.',
+    function(res) {
+      if (!res) return;
+      PopupService.prompt('Confirmation',
+        'If you want to delete all data, please type <b>delete</b>.', '',
+        function(ans) {
+          if (ans == 'delete') {
+            PopupService.alert('Information', 'All data are erased.');
+            WordData.clear();
+          } else if (ans != null) {
+            PopupService.alert('Information', 'Deletion is cancelled.');
+          }
+        });
+    });
 });

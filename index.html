@@ -26,7 +26,7 @@
   </div>
 
   <div data-role="content">
-    <!--<a href="#flashcard" data-role="button" data-rel="dialog" class="ui-disabled">Start</a>-->
+    <a onclick="Flashcard.study();" data-role="button" data-rel="dialog">Flashcard</a>
     <a href="#test" data-role="button" data-rel="dialog">Test</a>
     <a href="#allvocab" data-role="button" data-transition="slide">Search</a>
     <a href="#whitelistPage" data-role="button" data-transition="slide">Whitelist</a>
@@ -34,6 +34,7 @@
   </div>
 
   <div data-role="footer" data-position="fixed">
+    <h1>Version 0.7</h1>
     <h1>Copyright (c) 2014 Gary Guo</h1>
   </div>
 </div> 
@@ -62,20 +63,16 @@
   </div>
 </div>
 
-<!--<div data-role="page" id="flashcard">
+<div data-role="page" id="flashcard">
   <div data-role="header">
-    <a href="#main" data-role="button" data-icon="back" data-transition="slide" data-direction="reverse">&nbsp;</a>
-    <h1>I wanna recite SAT vocab!</h1>
+    <h1 id="flashcard-title"></h1>
   </div>
 
   <div data-role="content">
-    <p>TBD</p>
+    <p id="flashcard-cont"></p>
+    <a data-role="button" id="flashcard-btn">Next</a>
   </div>
-
-  <div data-role="footer">
-    <h1>Copyright (c) 2014 Gary Guo</h1>
-  </div>
-</div> -->
+</div>
 
 <div data-role="page" id="test">
   <div data-role="header">
@@ -111,15 +108,42 @@
       <input type="checkbox" data-role="flipswitch" id="autosound" onchange="Setting.autosound=$(this).prop('checked');" />
     </fieldset>
     <fieldset data-role="fieldcontain">
-    <label>Test Type</label>
-    <select id="testtype" onchange="Setting.testtype=$(this).val();" multiple="multiple" data-native-menu="false">
-      <option value="e2c">English to Chinese</option>
-      <option value="c2e">Chinese to English</option>
-      <option value="listen">Listening Test</option>
-    </select>
-  </fieldset>
+      <label>Test Type</label>
+      <select id="testtype" onchange="Setting.testtype=$(this).val();" multiple="multiple" data-native-menu="false">
+        <option value="e2c">English to Chinese</option>
+        <option value="c2e">Chinese to English</option>
+        <option value="listen">Listening Test</option>
+      </select>
+    </fieldset>
+    <a data-role="button" id="setting-delete">Remove All Data</a>
+  </div>
+</div> 
+
+<div data-role="page" id="popup">
+  <div data-role="header">
+    <h1 id="popup-title"></h1>
   </div>
 
+  <div data-role="content">
+    <p id="popup-cont"></p>
+    <div id="popup-btns" data-role="controlgroup" data-type="horizontal" style="text-align:center;">
+    </div>
+  </div>
+</div> 
+
+<div data-role="page" id="prompt">
+  <div data-role="header">
+    <h1 id="prompt-title"></h1>
+  </div>
+
+  <div data-role="content">
+    <p id="prompt-cont"></p>
+    <input id="prompt-input" onkeypress="if(event.which==13)$('#prompt-ok').click();"></input>
+    <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
+      <a data-role="button" id="prompt-ok" onclick="PopupService.result=$('#prompt-input').val();$('#prompt').dialog('close');">Done</a>
+      <a data-role="button" onclick="$('#prompt').dialog('close');">Cancel</a>
+    </div>
+  </div>
 </div> 
 
 </body>
