@@ -78,6 +78,16 @@ var WordData = (function() {
     clear: function() {
       this.data = [];
       this.update();
+    },
+    whitelist: function(word) {
+      var data = this.get(vocabId["-" + word]);
+      data.w = true;
+      this.update();
+    },
+    reset: function(word) {
+      var data = this.get(vocabId["-" + word]);
+      data.w = false;
+      this.update();
     }
   }
   var stored = localStorage['SATVocabData'];
@@ -188,9 +198,7 @@ var TestService = (function() {
       }
     },
     whitelist: function() {
-      var data = WordData.get(vocabId["-" + this.data.word]);
-      data.w = true;
-      WordData.update();
+      WordData.whitelist(this.data.word);
       this.next();
     },
     end: function() {
@@ -296,6 +304,10 @@ var Flashcard = {
       AudioService.pronounce(word);
     }
   },
+  whitelist: function() {
+    WordData.whitelist($("#flashcard-title").text());
+    $("#flashcard-btn").click();
+  },
   study: function(word) {
     var i = WordQueue.shift();
     WordQueue.push(i);
@@ -313,7 +325,7 @@ var PopupService = (function() {
       $("#popup-title").html(title);
       $("#popup-cont").html(cont);
       var result;
-      $("#popup").one('pagehide', function() {
+      $("#popup").one('pagebeforehide', function() {
         $("#popup-btns").controlgroup('destroy');
         if (callback) callback(result);
       });
@@ -343,7 +355,6 @@ var PopupService = (function() {
       $.mobile.changePage('#prompt', {
         role: 'dialog'
       });
-      $("#prompt-input").focus();
     },
     alert: function(title, cont, callback) {
       this.popup(title, cont, ["Done"], [true], callback);
@@ -387,6 +398,18 @@ function toggleDisplay(word) {
   }
 }
 
+function resetWord(word) {
+  event.preventDefault();
+  PopupService.confirm('Confirmation', 'Do you want to remove the word <b>' +
+    word.textContent + '</b> from whitelist?', function(res) {
+      if (res) {
+        WordData.reset(word.textContent);
+        $("#whitelist").html("");
+        $("#whitelistPage").trigger('pagebeforeshow');
+      }
+    });
+}
+
 $(document).on("pagebeforecreate", "#allvocab", function(event) {
   var allvocablist = $("#allvocablist");
   vocabularies.forEach(function(a, b) {
@@ -414,7 +437,8 @@ $(document).on("pagebeforeshow", "#whitelistPage", function(event) {
   vocabularies.forEach(function(a, b) {
     if (WordData.get(b).w) {
       whitelist.append(
-        '<li data-icon="false"><a onclick="toggleDisplay(this);">' + a +
+        '<li data-icon="false"><a onclick="toggleDisplay(this);" oncontextmenu="resetWord(this);">' +
+        a +
         "</a></li>");
     }
   });

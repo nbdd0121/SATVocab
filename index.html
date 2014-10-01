@@ -34,7 +34,7 @@
   </div>
 
   <div data-role="footer" data-position="fixed">
-    <h1>Version 0.7.2</h1>
+    <h1>Version 0.7.3</h1>
     <h1>Copyright (c) 2014 Gary Guo</h1>
   </div>
 </div> 
@@ -71,7 +71,10 @@
 
   <div data-role="content">
     <p id="flashcard-cont"></p>
-    <a data-role="button" id="flashcard-btn">Next</a>
+    <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
+      <a data-role="button" id="flashcard-btn">Next</a>
+      <a data-role="button" onclick="Flashcard.whitelist();">Whitelist</a>
+    </div>
   </div>
 </div>
 
@@ -143,7 +146,7 @@
 
   <div data-role="content">
     <p id="prompt-cont"></p>
-    <input id="prompt-input" onkeypress="if(event.which==13)$('#prompt-ok').click();"></input>
+    <input id="prompt-input" onkeypress="if(event.which==13)$('#prompt-ok').click();" autofocus></input>
     <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
       <a data-role="button" id="prompt-ok" onclick="PopupService.result=$('#prompt-input').val();$('#prompt').dialog('close');">Done</a>
       <a data-role="button" onclick="$('#prompt').dialog('close');">Cancel</a>
