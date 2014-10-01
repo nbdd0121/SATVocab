@@ -29,6 +29,7 @@
     <!--<a href="#flashcard" data-role="button" data-rel="dialog" class="ui-disabled">Start</a>-->
     <a href="#test" data-role="button" data-rel="dialog">Test</a>
     <a href="#allvocab" data-role="button" data-transition="slide">Search</a>
+    <a href="#whitelistPage" data-role="button" data-transition="slide">Whitelist</a>
     <a href="#setting" data-role="button" data-transition="slide">Setting</a>
   </div>
 
@@ -45,6 +46,18 @@
 
   <div data-role="content">
     <ul id="allvocablist" data-role="listview" data-autodividers="true" data-filter="true" data-filter-placeholder="Search Word">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="whitelistPage">
+  <div data-role="header">
+    <a href="#main" data-role="button" data-icon="back">&nbsp;</a>
+    <h1>Whitelist</h1>
+  </div>
+
+  <div data-role="content">
+    <ul id="whitelist" data-role="listview" data-autodividers="true" data-filter="true" data-filter-placeholder="Search Word">
     </ul>
   </div>
 </div>
@@ -76,10 +89,11 @@
     <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
     <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
     <a class="option" data-role="button" onclick="TestService.helper.mcqClick(this);"></a>
+
     <br/>
     <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
       <a data-role="button" onclick="TestService.hint();">Hint</a>
-      <!--<a data-role="button" onclick="alert('Oops! This feature isn\'t available now!')">Whitelist</a>-->
+      <a data-role="button" onclick="TestService.whitelist();">Whitelist</a>
     </div>
     
   </div>

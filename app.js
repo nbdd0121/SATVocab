@@ -1,3 +1,14 @@
+Array.prototype.random = function() {
+  var id = Math.floor(Math.random() * this.length);
+  return this[id];
+}
+
+Array.prototype.shuffle = function() {
+  for (var j, x, i = this.length; i; j = Math.floor(Math.random() * i), x =
+    this[--i], this[i] = this[j], this[j] = x);
+  return this;
+}
+
 var AudioService = {
   audio: $('<audio>')[0],
   play: function(src) {
@@ -43,9 +54,62 @@ var Setting = (function() {
   return setting;
 })();
 
+var WordData = (function() {
+  var data = {
+    get: function(word) {
+      return this.data[word];
+    },
+    update: function() {
+      localStorage['SATVocabData'] = JSON.stringify(this.data);
+    }
+  }
+  var stored = localStorage['SATVocabData'];
+  if (stored) {
+    stored = JSON.parse(stored);
+  } else {
+    stored = [];
+  }
+  var modified = false;
+  for (var i = 0; i < vocabularies.length; i++) {
+    if (!stored[i]) {
+      stored[i] = {
+        w: false
+      };
+      modified = true;
+    }
+  }
+  data.data = stored;
+  if (modified) {
+    data.update();
+  }
+  return data;
+})();
+
+var WordQueue;
+
+function refreshWordQueue() {
+  WordQueue = [];
+  for (var i = 0; i < vocabularies.length; i++) {
+    var data = WordData.get(i);
+    if (!data.w) {
+      WordQueue.push(i);
+    }
+  }
+  WordQueue.shuffle();
+}
+
+refreshWordQueue();
+
 var TestService = (function() {
   function getWord() {
-    return vocabularies.random();
+    if (WordQueue.length == 0) {
+      refreshWordQueue();
+      if (WordQueue.length == 0) {
+        alert("You have finished every single word.");
+        return vocabularies[0];
+      }
+    }
+    return vocabularies[WordQueue.pop()];
   }
   var service = {
     current: null,
@@ -56,7 +120,6 @@ var TestService = (function() {
         if (!service.answer(ans)) {
           $(btn).addClass("ui-disabled");
         } else {
-          $(".option").removeClass("ui-disabled");
           service.next();
         }
       },
@@ -89,6 +152,9 @@ var TestService = (function() {
       mcqAnswer: function(ans) {
         return ans == service.data.answer;
       },
+      mcqEnd: function() {
+        $(".option").removeClass("ui-disabled");
+      },
       mcqWrapper: function(generator) {
         var wrapped = {
           next: function(word) {
@@ -97,12 +163,22 @@ var TestService = (function() {
           },
           answer: service.helper.mcqAnswer,
           voice: service.helper.mcqVoice,
-          hint: service.helper.mcqHint
+          hint: service.helper.mcqHint,
+          end: service.helper.mcqEnd,
         };
         return wrapped;
       }
     },
+    whitelist: function() {
+      var data = WordData.get(vocabId["-" + this.data.word]);
+      data.w = true;
+      WordData.update();
+      this.next();
+    },
     next: function() {
+      if (service.current) {
+        service.current.end();
+      }
       service.current = service.pool[Setting.testtype.random()];
       service.current.next(getWord());
     },
@@ -190,17 +266,6 @@ TestService.pool.listen = $.extend(TestService.helper.mcqWrapper(function(word) 
   }
 });
 
-Array.prototype.random = function() {
-  var id = Math.floor(Math.random() * this.length);
-  return this[id];
-}
-
-Array.prototype.shuffle = function() {
-  for (var j, x, i = this.length; i; j = Math.floor(Math.random() * i), x =
-    this[--i], this[i] = this[j], this[j] = x);
-  return this;
-}
-
 function lookup(word) {
   return explanations[vocabId["-" + word]];
 }
@@ -235,7 +300,7 @@ function toggleDisplay(word) {
 
 $(document).on("pagebeforecreate", "#allvocab", function(event) {
   var allvocablist = $("#allvocablist");
-  vocabularies.forEach(function(a) {
+  vocabularies.forEach(function(a, b) {
     allvocablist.append(
       '<li data-icon="false"><a onclick="toggleDisplay(this);">' + a +
       "</a></li>");
@@ -251,4 +316,21 @@ $(document).on("pagebeforeshow", "#setting", function(event) {
   $("#autosound").flipswitch('refresh');
   $("#testtype").val(Setting.testtype);
   $("#testtype").selectmenu('refresh');
+});
+
+$(document).on("pagebeforeshow", "#whitelistPage", function(event) {
+  var whitelist = $("#whitelist");
+  vocabularies.forEach(function(a, b) {
+    if (WordData.get(b).w) {
+      whitelist.append(
+        '<li data-icon="false"><a onclick="toggleDisplay(this);">' + a +
+        "</a></li>");
+    }
+  });
+  whitelist.listview('refresh');
+});
+
+$(document).on("pagehide", "#whitelistPage", function(event) {
+  var whitelist = $("#whitelist");
+  whitelist.html("");
 });
