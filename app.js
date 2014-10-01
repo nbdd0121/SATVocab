@@ -434,12 +434,16 @@ $(document).on("pagebeforeshow", "#setting", function(event) {
 
 $(document).on("pagebeforeshow", "#whitelistPage", function(event) {
   var whitelist = $("#whitelist");
+  var swipe = function(event) {
+    resetWord(event.target);
+  };
   vocabularies.forEach(function(a, b) {
     if (WordData.get(b).w) {
-      whitelist.append(
-        '<li data-icon="false"><a onclick="toggleDisplay(this);" oncontextmenu="resetWord(this);">' +
-        a +
+      var w = $(
+        '<li data-icon="false"><a onclick="toggleDisplay(this);">' + a +
         "</a></li>");
+      w.on('swipe', swipe).on('contextmenu', swipe);
+      whitelist.append(w);
     }
   });
   whitelist.listview('refresh');
