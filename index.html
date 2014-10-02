@@ -8,11 +8,11 @@
 <meta content="black" name="apple-mobile-web-app-status-bar-style" />
 <meta content="telephone=no,email=no" name="format-detection" />
 
-<link rel="shortcut icon" href="icon.png">
-<link rel="icon" href="icon.png">
+<link rel="shortcut icon" href="icon.png" />
+<link rel="icon" href="icon.png" />
 <link rel="apple-touch-icon" href="icon.png" />
 
-<link rel="stylesheet" href="jquery/jquery.mobile-1.4.4.min.css">
+<link rel="stylesheet" href="jquery/jquery.mobile-1.4.4.min.css" />
 <script src="jquery/jquery-1.8.3.min.js"></script>
 <script src="jquery/jquery.mobile-1.4.4.min.js"></script>
 <script src="wordlist.js"></script>
@@ -32,6 +32,8 @@
     <a href="#whitelistPage" data-role="button" data-transition="slide">Whitelist</a>
     <a href="#setting" data-role="button" data-transition="slide">Setting</a>
   </div>
+
+  <p id="progress" style="text-align:center;display:none;"></p>
 
   <div data-role="footer" data-position="fixed">
     <h1>Version 0.7.4</h1>
@@ -66,13 +68,13 @@
 <div data-role="page" id="flashcard">
   <div data-role="header">
     <h1 id="flashcard-title"></h1>
-    <a data-role="button" class="ui-btn-right" id="pron" onclick="AudioService.pronounce($('#flashcard-title').text());"><img src="pron.png"></img></a>
+    <a data-role="button" class="ui-btn-right" onclick="AudioService.pronounce($('#flashcard-title').text());"><img src="pron.png"></img></a>
   </div>
 
   <div data-role="content">
     <p id="flashcard-cont"></p>
     <div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
-      <a data-role="button" id="flashcard-btn">Next</a>
+      <a data-role="button" id="flashcard-btn" onclick="Flashcard.onnext();">Next</a>
       <a data-role="button" onclick="Flashcard.whitelist();">Whitelist</a>
     </div>
   </div>

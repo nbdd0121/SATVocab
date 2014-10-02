@@ -296,7 +296,7 @@ var Flashcard = {
   view: function(word, callback) {
     $("#flashcard-title").text(word);
     $("#flashcard-cont").text(lookup(word));
-    $("#flashcard-btn").text("Done").one('click', callback);
+    this.onnext = callback;
     $.mobile.changePage('#flashcard', {
       role: 'dialog'
     });
@@ -312,7 +312,6 @@ var Flashcard = {
     var i = WordQueue.shift();
     WordQueue.push(i);
     this.view(vocabularies[i], Flashcard.study.bind(Flashcard));
-    $("#flashcard-btn").text("Next");
   },
   hide: function() {
     $('#flashcard').dialog('close');
@@ -325,9 +324,13 @@ var PopupService = (function() {
       $("#popup-title").html(title);
       $("#popup-cont").html(cont);
       var result;
-      $("#popup").one('pagebeforehide', function() {
+      if (callback) {
+        $("#popup").one('pagebeforehide', function() {
+          callback(result);
+        });
+      }
+      $("#popup").one('pagehide', function() {
         $("#popup-btns").controlgroup('destroy');
-        if (callback) callback(result);
       });
       $("#popup-btns").html("");
       options.forEach(function(a, b) {
@@ -470,4 +473,8 @@ $(document).on('click', '#setting-delete', function(event) {
           }
         });
     });
+});
+
+$(document).on("pagebeforeshow", "#main", function(event) {
+  $("#progress").text(WordQueue.length + "/" + vocabularies.length);
 });
