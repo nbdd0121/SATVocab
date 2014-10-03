@@ -167,20 +167,20 @@ var TestService = (function() {
       mcqAnswer: function(ans) {
         return ans == service.data.answer;
       },
-      mcqEnd: function() {
+      mcqEnd: function(callback) {
         var disabled = $(".option.ui-disabled");
         if (disabled.length != 0) {
           $(".option").removeClass("ui-disabled");
           if (Setting.autoreview) {
             Flashcard.view(service.data.word, function() {
               Flashcard.hide();
-              service.next();
+              //callback();
             });
           } else {
-            service.next();
+            callback();
           }
         } else {
-          service.next();
+          callback();
         }
       },
       mcqWrapper: function(generator) {
@@ -202,7 +202,9 @@ var TestService = (function() {
       this.next();
     },
     end: function() {
-      service.current.end();
+      var c = service.current;
+      service.current = null;
+      c.end(service.next.bind(service));
     },
     next: function() {
       service.current = service.pool[Setting.testtype.random()];
@@ -424,6 +426,11 @@ $(document).on("pagebeforecreate", "#allvocab", function(event) {
 
 $(document).on("pagebeforeshow", "#test", function(event) {
   TestService.next();
+});
+
+$(document).on("pagehide", "#test", function(event) {
+  if (TestService.current)
+    TestService.current.end(Function.prototype);
 });
 
 $(document).on("pagebeforeshow", "#setting", function(event) {
